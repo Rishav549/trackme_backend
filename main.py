@@ -3,6 +3,7 @@ from db.db import engine,Base
 from fastapi.middleware.cors import CORSMiddleware
 from routes.employee_master import router as employee_router
 from routes.attendance import router as attendance_router
+from routes.monitor import router as monitor_router
 from fastapi.staticfiles import StaticFiles
 Base.metadata.create_all(bind=engine)
 
@@ -22,6 +23,7 @@ app.add_middleware(
 )
 app.include_router(employee_router)
 app.include_router(attendance_router)
+app.include_router(monitor_router)
 @app.get("/")
 async def read_root():
     return {"status": "Ok"}

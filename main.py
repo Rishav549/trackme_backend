@@ -2,9 +2,15 @@ from fastapi import FastAPI
 from db.db import engine,Base
 from fastapi.middleware.cors import CORSMiddleware
 from routes.employee_master import router as employee_router
+from fastapi.staticfiles import StaticFiles
 Base.metadata.create_all(bind=engine)
 
+
 app = FastAPI()
+
+UPLOAD_DIRECTORY = "./uploaded_images"
+app.mount("/uploaded_images", StaticFiles(directory=UPLOAD_DIRECTORY), name="uploaded_images")
+
 
 app.add_middleware(
     CORSMiddleware,

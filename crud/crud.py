@@ -21,6 +21,9 @@ async def post_attendance(db:Session, data: Attendance_create):
     db.refresh(post_attendance)
     return post_attendance
 
+async def get_attendance(skip:int, limit: int, db: Session):
+    return db.query(AttendanceModel).offset(skip).limit(limit).all()
+
 async def post_monitor(db:Session, data: Monitor_create):
     post_monitor = MonitorModel(**data.dict())
     db.add(post_monitor)

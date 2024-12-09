@@ -14,6 +14,9 @@ async def post_employee_details(db: Session, data: Employee_create):
     db.refresh(post_employee_details)
     return post_employee_details
 
+async def get_employee(skip:int, limit: int, db: Session):
+    return db.query(UserModel).offset(skip).limit(limit).all()
+
 async def post_attendance(db:Session, data: Attendance_create):
     post_attendance = AttendanceModel(**data.dict())
     db.add(post_attendance)

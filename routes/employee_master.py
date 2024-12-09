@@ -4,7 +4,7 @@ from fastapi.responses import JSONResponse
 from utilities.auth import authenticate_user, get_user_by_email, create_user
 from utilities.crypt import create_access_token,create_refresh_token, decode_token
 from schemas.employee_master import Employee_create, Employee_view, Login
-from crud.crud import post_employee_details
+from crud.crud import post_employee_details, get_employee
 from db.db import get_db
 import uuid
 import os
@@ -71,3 +71,8 @@ async def register_user(
         return JSONResponse({"detail":e},status_code=400)
     create_user(db, user_data)
     return JSONResponse({"detail":"User Created"},status_code=201)
+
+@router.get("/employee/get")
+async def get_data(skip: int= 1, limit: int =10, db: Session =Depends(get_db)):
+    get_data = await get_employee(db=db, skip=skip, limit=limit)
+    return get_data

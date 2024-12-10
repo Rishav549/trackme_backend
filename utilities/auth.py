@@ -27,3 +27,27 @@ def create_user(db: Session,user:dict):
     db.commit()
     db.refresh(db_user)
     return db_user
+
+async def get_current_user_refresh(token: str,db: Session = Depends(get_db))-> UserModel:
+    token_data = decode_token(token)
+    if token_data is None:
+        raise HTTPException(
+            status_code=401,
+            detail="Could not validate credentials",
+            headers={"WWW-Authenticate": "Authorization"},
+        )
+    if token_data.token_type == "access":
+        raise HTTPException(
+            status_code=401,
+            detail="Invalid Token Type",
+            headers={"WWW-Authenticate": "Authorization"},
+        )
+    user = db.get(UserModel,token_data.id)
+
+    if not user:
+        raise HTTPException(
+            status_code=401,
+            detail="User not found",
+            headers={"WWW-Authenticate": "Authorization"},
+        )
+    return user

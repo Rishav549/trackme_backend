@@ -1,9 +1,9 @@
 from fastapi import APIRouter,Depends, Request, status, HTTPException, UploadFile, File, Form
 from sqlalchemy.orm import Session
 from fastapi.responses import JSONResponse
-from utilities.auth import authenticate_user, get_user_by_email, create_user
+from utilities.auth import authenticate_user, get_user_by_email, create_user,get_current_user_refresh
 from utilities.crypt import create_access_token,create_refresh_token, decode_token
-from schemas.employee_master import Employee_create, Employee_view, Login
+from schemas.employee_master import Employee_create, Employee_view, Login, RefreshToken
 from crud.crud import post_employee_details, get_employee
 from db.db import get_db
 import uuid
@@ -22,8 +22,8 @@ async def login(form_data: Login,db: Session= Depends(get_db)):
             content="Incorrect email or password",
             headers={"WWW-Authenticate": "Bearer"},
         )
-    access_token=create_access_token(data={"id": user.id,"emp_email": user.emp_email,"tagged_imei": user.tagged_imei})
-    refresh_token=create_refresh_token(data={"id": user.id,"emp_email": user.emp_email,"tagged_imei": user.tagged_imei})
+    access_token=create_access_token(data={"id": user.id,"emp_email": user.emp_email})
+    refresh_token=create_refresh_token(data={"id": user.id,"emp_email": user.emp_email})
     return {"access_token": access_token, "token_type": "bearer", "refresh_token": refresh_token, "name":user.emp_name,"email":user.emp_email}
 
 @router.post("/auth/register/")
@@ -71,6 +71,17 @@ async def register_user(
         return JSONResponse({"detail":e},status_code=400)
     create_user(db, user_data)
     return JSONResponse({"detail":"User Created"},status_code=201)
+
+@router.post("/auth/token/refresh/")
+async def refresh_access_token(token: RefreshToken, db: Session = Depends(get_db)):
+    try:
+        user = await get_current_user_refresh(token.refresh_token,db=db)
+        access_token = create_access_token(data={"id":user.id,"email": user.emp_email})
+        refresh_token = create_refresh_token(data={"id":user.id,"email": user.emp_email})
+        return {"access_token": access_token, "token_type": "bearer", "refresh_token": refresh_token}
+    except HTTPException as e:
+        return JSONResponse(status_code=e.status_code,content={"detail":e.detail})
+ 
 
 @router.get("/employee/get")
 async def get_data(skip: int= 1, limit: int =10, db: Session =Depends(get_db)):

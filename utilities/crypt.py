@@ -36,7 +36,8 @@ def create_refresh_token(data: dict):
 def decode_token(token: str)-> TokenData:
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        email: str = payload.get("email")
+        email: str = payload.get("emp_email")
+        print(email)
         user_id : int = payload.get("id")
         token_type: str = payload.get("token_type")
         if email is None:
